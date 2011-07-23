@@ -6,6 +6,8 @@
  *	Authors: Heng Li, Bob Handsaker, Jue Ruan, Colin Hercus, Petr Danecek
  * Contact:
  *	plindenbaum@yahoo.fr
+ * Reference:
+ *	http://plindenbaum.blogspot.com/2011/07/text-alignment-viewer-using-samtools.html
  * WWW:
  *	http://plindenbaum.blogspot.com
  *	http://samtools.sourceforge.net/
@@ -404,7 +406,7 @@ static void usage()
 	fprintf(stderr, "Usage: bamtk ttview (options) <aln.bam> [ref.fasta]\n");
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  -g <region>\n");
-	fprintf(stderr, "  -f <filename> reads a list regions\n");
+	fprintf(stderr, "  -f <filename> reads a list regions ( '-' for stdin)\n");
 	fprintf(stderr, "  -d toggle dot view\n");
 	//fprintf(stderr, "  -s ref skip\n");
 	fprintf(stderr, "  -r toggle read name\n");
@@ -522,11 +524,15 @@ int bam_ttview_main(int argc, char *argv[])
 		{
 		int tid = -1, beg,end;
 		char line[BUFSIZ];
-		FILE* in=fopen(filename,"r");
-		if(in==NULL)
+		FILE* in=stdin;
+		if(strcmp(filename,"-")!=0)
 			{
-			fprintf(stderr,"Cannot open %s %s\n",filename,strerror(errno));
-			exit(EXIT_FAILURE);
+			in=fopen(filename,"r");
+			if(in==NULL)
+				{
+				fprintf(stderr,"Cannot open %s %s\n",filename,strerror(errno));
+				exit(EXIT_FAILURE);
+				}
 			}
 		while(fgets(line,BUFSIZ,in)!=NULL)
 			{
@@ -546,7 +552,10 @@ int bam_ttview_main(int argc, char *argv[])
 				fputc('\n',stdout);
 				}
 			}
-		fclose(in);
+		if(strcmp(filename,"-")!=0)
+			{
+			fclose(in);
+			}
 		}
 	else
 		{
