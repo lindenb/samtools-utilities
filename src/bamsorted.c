@@ -8,6 +8,8 @@ WWW:
 	http://plindenbaum.blogspot.com
 Contact:
 	plindenbaum@yahoo.fr
+Reference:
+	http://plindenbaum.blogspot.com/2011/02/testing-if-bam-file-is-sorted-using.html
 Compilation:
 	FLAG64= -m64
 	gcc ${FLAG64} -O3 -I ${SAMDIR} -L ${SAMDIR} bamsorted.c -lbam -lz

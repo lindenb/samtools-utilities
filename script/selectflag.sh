@@ -1,3 +1,4 @@
+#!/bin/sh
 dialog --stdout --title "SAM FLAGS" \
 	--nocancel \
 	--separate-output \

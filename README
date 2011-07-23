@@ -1,1 +1,10 @@
-Utilites for samtools
+Utilites for samtools. 
+
+A set of tools described in my blog:
+
+- http://plindenbaum.blogspot.com/2011/02/testing-if-bam-file-is-sorted-using.html
+
+- http://plindenbaum.blogspot.com/2011/07/interactive-dialog-generating-sam-flag.html
+
+- http://plindenbaum.blogspot.com/2011/07/text-alignment-viewer-using-samtools.html
+
