@@ -1,10 +1,23 @@
 Utilites for samtools. 
 
-A set of tools described in my blog:
+Author:
+	Pierre Lindenbaum PhD
 
-- http://plindenbaum.blogspot.com/2011/02/testing-if-bam-file-is-sorted-using.html
+WWW:
+	http://plindenbaum.blogspot.com
 
-- http://plindenbaum.blogspot.com/2011/07/interactive-dialog-generating-sam-flag.html
+Mail:
+	plindenbaum@yahoo.fr
 
-- http://plindenbaum.blogspot.com/2011/07/text-alignment-viewer-using-samtools.html
 
+
+
+A set of tools using the samtools API:
+
+- bamsorted: tests if a bam file is sorted. See http://plindenbaum.blogspot.com/2011/02/testing-if-bam-file-is-sorted-using.html
+ 
+- selectflag: interactive dialog returning a SAM flag. See http://plindenbaum.blogspot.com/2011/07/interactive-dialog-generating-sam-flag.html
+
+- ttview a text-based short reads alignment viewer writing to stdout. See http://plindenbaum.blogspot.com/2011/07/text-alignment-viewer-using-samtools.html
+
+ - bam2wig: transforms a bam file to the UCSC wig format.

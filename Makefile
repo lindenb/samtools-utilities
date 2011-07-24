@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -O2
 
-all:bin/ttview bin/selectflag bin/bamsorted
+all:bin/ttview bin/selectflag bin/bamsorted bin/bam2wig
 
 
 checkenv:
@@ -16,9 +16,20 @@ bin/selectflag:script/selectflag.sh bin
 
 bin/bamsorted:src/bamsorted.c bin checkenv
 	$(CC) ${CFLAGS} -o $@ -I ${SAMDIR} -L ${SAMDIR} $< -lbam -lz
+bin/bam2wig:src/bam2wig.c bin checkenv
+	$(CC) ${CFLAGS} -o $@ -I ${SAMDIR} -L ${SAMDIR} $< -lbam -lz
+
 
 bin:
 	mkdir -p bin
+
+test:test-samtools bin/bam2wig
+	bin/bam2wig ${SAMDIR}/examples/toy.bam
+	bin/bam2wig ${SAMDIR}/examples/toy.bam "ref2:10-20"
+	
+test-samtools:
+	${SAMDIR}/samtools view -b ${SAMDIR}/examples/toy.sam -t ${SAMDIR}/examples/toy.fa -o ${SAMDIR}/examples/toy.bam
+	${SAMDIR}/samtools index  ${SAMDIR}/examples/toy.bam
 
 clean:
 	rm -f bin/battview bin/bamsorted bin/selectflag

@@ -7,20 +7,38 @@
  *	http://plindenbaum.blogspot.com
  *	http://samtools.sourceforge.net/
  *	http://samtools.sourceforge.net/sam-exam.shtml
+ * Reference:
+ *	http://genome.ucsc.edu/goldenPath/help/wiggle.html
  * Motivation:
- *	creates a WIG file from a BAM file.
+ *	creates a WIGGLE file from a BAM file.
+ * Usage:
+ *	bam2wig <bam-file> (<region>)
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <errno.h>
 #include "sam.h"
 
-typedef struct parameter_t{
+static const int NUM_ZERO_ACCEPTED_DEFAULT=10;
+
+typedef struct parameter_t
+	{
+	/** output stream */
 	FILE* out;
+	/** previous chromosome seen */
 	int prev_tid;
+	/** previous genomic position seen */
 	int prev_pos;
+	/** user's start position */
 	int beg;
+	/** user's end position */
 	int end;
+	/** number of depth=0 seen */
+	int count_zero;
+	/** max number of depth=0 allowed */
+	int pref_zero;
+	/** input BAM */
 	samfile_t *in;
 } Param,*ParamPtr;
 
@@ -32,19 +50,36 @@ static int fetch_func(const bam1_t *b, void *data)
 	return 0;
 }
 // callback for bam_plbuf_init()
-static int  scan_all_genome_func(uint32_t tid, uint32_t pos, int n, const bam_pileup1_t *pl, void *data)
+static int  scan_all_genome_func(uint32_t tid, uint32_t pos, int depth, const bam_pileup1_t *pl, void *data)
 	{
 	ParamPtr param = (ParamPtr)data;
 	if ((int)pos >= param->beg && (int)pos < param->end)
 		{
-		if(param->prev_tid!=tid || param->prev_pos+1!=(int)pos)
+		if(depth==0) /* no coverage */
 			{
-			fprintf(param->out,"name=%s pos=%d\n", param->in->header->target_name[tid],pos);
+			param->count_zero++;
 			}
-	
-		fprintf(param->out,"%d\n",n);
+		else
+			{
+			
+			if(param->prev_tid!=tid || /* not the same chromosome */
+			   param->prev_pos+1+param->count_zero!=(int)pos || /* not the expected index  */
+			   param->count_zero > param->pref_zero /* too many depth=0 */
+			   )
+				{
+				param->count_zero=0;/* reset count depth=0 */
+				/* print WIGGLE header */
+				fprintf(param->out,"fixedStep chrom=%s start=%d step=1 span=1\n", param->in->header->target_name[tid],pos);
+				}
+			while(param->count_zero >0)
+				{
+				fputs("0\n",param->out);
+				param->count_zero--;
+				}
+			fprintf(param->out,"%d\n",depth);
+			param->prev_pos=(int)pos;
+			}
 		param->prev_tid=(int)tid;
-		param->prev_pos=(int)pos;
 		}
 	
 	return 0;
@@ -56,12 +91,25 @@ static void usage()
 	fprintf(stdout, "Last compilation:%s %s\n",__DATE__,__TIME__);
 	fprintf(stdout, "Usage: bam2wig (options) <aln.bam>\n");
 	fprintf(stdout, "Options:\n");
+	fprintf(stdout, " -z <int> number of depth=0 accepted before starting a new WIG file (default:%d).:\n",NUM_ZERO_ACCEPTED_DEFAULT);
+	fprintf(stdout, " -o <filename-out> save as... (default:stdout).\n");
 	}
 	
 int main(int argc, char *argv[])
 	{
 	int optind=1;
+	char* fileout=NULL;
 	Param parameter;
+	
+	parameter.out=stdout;
+	parameter.prev_tid=-1;
+	parameter.prev_pos=-1;
+	parameter.beg = 0;
+	parameter.end = INT_MAX;
+	parameter.pref_zero=NUM_ZERO_ACCEPTED_DEFAULT;
+	parameter.count_zero=0;
+	parameter.in=NULL;
+	
 	while(optind < argc)
 		{
 		if(strcmp(argv[optind],"-h")==0)
@@ -69,9 +117,17 @@ int main(int argc, char *argv[])
 		        usage();
 		        return EXIT_FAILURE;
 		        }
-		else if(strcmp(argv[optind],"-g")==0 && optind+1<argc)
+		else if(strcmp(argv[optind],"-o")==0 && optind+1<argc)
+			{
+			fileout=argv[++optind];
+			}
+		else if(strcmp(argv[optind],"-z")==0 && optind+1<argc)
 		        {
-		      
+		      	parameter.pref_zero=atoi(argv[++optind]);
+		        if(parameter.pref_zero<0)
+		        	{
+		        	parameter.pref_zero=0;
+		        	}
 		        }
 		else if(strcmp(argv[optind],"--")==0)
 		        {
@@ -89,16 +145,7 @@ int main(int argc, char *argv[])
 		        }
 		++optind;
 		}
-	
-	
-	
-	
-	parameter.out=stdout;
-	parameter.prev_tid=-1;
-	parameter.prev_pos=-1;
-	parameter.beg = 0;
-	parameter.end = INT_MAX;
-	
+
 	parameter.in = samopen(argv[optind], "rb", 0);
 	if (parameter.in == 0)
 		{
@@ -106,34 +153,51 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 		}
 	
-
+	if(fileout!=NULL)
+		{
+		errno=0;
+		parameter.out=fopen(fileout,"w");
+		if(parameter.out==NULL)
+			{
+			fprintf(stderr, "Cannot open \"%s\" %s.\n",fileout,strerror(errno));
+			return EXIT_FAILURE;
+			}
+		}
 	
-	if (argc == 2)
+	if (optind+1 == argc)
 		{
 		sampileup(parameter.in, -1, scan_all_genome_func, &parameter);
 		}	
-	else {
+	else  if (optind+2 == argc)
+	        {
 		int ref;
 		bam_index_t *idx;
 		bam_plbuf_t *buf;
-		idx = bam_index_load(argv[1]); // load BAM index
-		if (idx == 0) {
-			fprintf(stderr, "BAM indexing file is not available.\n");
-			return 1;
-		}
-		bam_parse_region(parameter.in->header, argv[2], &ref,
+		idx = bam_index_load(argv[optind]); // load BAM index
+		if (idx == 0)
+			{
+			fprintf(stderr, "BAM indexing file is not available for \"%s\".\n",argv[optind]);
+			return EXIT_FAILURE;
+			}
+		bam_parse_region(parameter.in->header, argv[optind+1], &ref,
 		                 &parameter.beg, &parameter.end); // parse the region
-		if (ref < 0) {
-			fprintf(stderr, "Invalid region %s\n", argv[2]);
-			return 1;
-		}
+		if (ref < 0)
+			{
+			fprintf(stderr, "Invalid region %s\n", argv[optind+1]);
+			return EXIT_FAILURE;
+			}
 		buf = bam_plbuf_init( scan_all_genome_func, &parameter); // initialize pileup
 		bam_fetch(parameter.in->x.bam, idx, ref, parameter.beg, parameter.end, buf, fetch_func);
 		bam_plbuf_push(0, buf); // finalize pileup
 		bam_index_destroy(idx);
 		bam_plbuf_destroy(buf);
-	}
+		}
 	samclose(parameter.in);
-	return 0;
+	if(fileout!=NULL)
+		{
+		fflush(parameter.out);
+		fclose(parameter.out);
+		}
+	return EXIT_SUCCESS;
 	}
 

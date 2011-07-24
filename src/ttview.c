@@ -402,19 +402,20 @@ static int ttv_draw_aln(ttview_t *tv, int tid, int pos)
 
 static void usage()
 	{
-	 fprintf(stderr,"Pierre Lindenbaum PHD. 2010.\nOrginal code: from the samtools package http://samtools.sourceforge.net . \n");
-	fprintf(stderr, "Usage: bamtk ttview (options) <aln.bam> [ref.fasta]\n");
-	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -g <region>\n");
-	fprintf(stderr, "  -f <filename> reads a list regions ( '-' for stdin)\n");
-	fprintf(stderr, "  -d toggle dot view\n");
+	 fprintf(stdout,"Pierre Lindenbaum PHD. 2011.\nOrginal code: from the samtools package http://samtools.sourceforge.net . \n");
+	fprintf(stdout, "Last compilation:%s %s\n",__DATE__,__TIME__);
+	fprintf(stdout, "Usage: ttview (options) <aln.bam> [ref.fasta]\n");
+	fprintf(stdout, "Options:\n");
+	fprintf(stdout, "  -g <region>\n");
+	fprintf(stdout, "  -f <filename> reads a list regions ( '-' for stdin)\n");
+	fprintf(stdout, "  -d toggle dot view\n");
 	//fprintf(stderr, "  -s ref skip\n");
-	fprintf(stderr, "  -r toggle read name\n");
-	fprintf(stderr, "  -N nt view\n");
-	fprintf(stderr, "  -C cs view\n");
-	fprintf(stderr, "  -i insertions\n");
-	fprintf(stderr, "  -X <int> number of columns\n");
-	fprintf(stderr, "  -T <positive int> shift all positions by <T>.\n");
+	fprintf(stdout, "  -r toggle read name\n");
+	fprintf(stdout, "  -N nt view\n");
+	fprintf(stdout, "  -C cs view\n");
+	fprintf(stdout, "  -i insertions\n");
+	fprintf(stdout, "  -X <int> number of columns\n");
+	fprintf(stdout, "  -T <positive int> shift all positions by <T>.\n");
 	}
 
 int bam_ttview_main(int argc, char *argv[])
@@ -426,7 +427,7 @@ int bam_ttview_main(int argc, char *argv[])
 	int shift=0;
 	int base_for=TV_BASE_NUCL, is_dot=1, ins=1, no_skip=0, show_name=0;
 	int columns=80;
-	 while(optind < argc)
+	while(optind < argc)
 		{
 		if(strcmp(argv[optind],"-h")==0)
 		        {

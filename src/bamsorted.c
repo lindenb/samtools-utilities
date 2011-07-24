@@ -123,7 +123,8 @@ int main(int argc, char *args[])
 	    {
 	    if(strcmp(args[optind],"-h")==0)
 		    {
-		    fprintf(stdout,"Compilation %s: %s\n",__DATE__,__TIME__);
+		    fprintf(stdout, "Author: Pierre Lindenbaum PHD. 2011.\n");
+		    fprintf(stdout, "Last compilation:%s %s\n",__DATE__,__TIME__);
 		    return EXIT_SUCCESS;
 		    }
 	    else if(strcmp(args[optind],"--")==0)
