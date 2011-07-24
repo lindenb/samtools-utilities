@@ -192,6 +192,11 @@ int main(int argc, char *argv[])
 		bam_index_destroy(idx);
 		bam_plbuf_destroy(buf);
 		}
+	else
+		{
+		fprintf(stderr, "illegal number of arguments.\n",argv[optind]);
+		return EXIT_FAILURE;
+		}
 	samclose(parameter.in);
 	if(fileout!=NULL)
 		{

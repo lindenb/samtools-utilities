@@ -8,9 +8,10 @@ WWW:
 
 Mail:
 	plindenbaum@yahoo.fr
-
-
-
+	
+Compilation:
+	Define the variable ${SAMDIR} before compiling e.g: `export SAMDIR=/usr/local/softwares/samtools-0.1.17`
+	Then, invoke `make`
 
 A set of tools using the samtools API:
 
