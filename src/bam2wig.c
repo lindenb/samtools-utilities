@@ -68,8 +68,8 @@ static int  scan_all_genome_func(uint32_t tid, uint32_t pos, int depth, const ba
 			   )
 				{
 				param->count_zero=0;/* reset count depth=0 */
-				/* print WIGGLE header */
-				fprintf(param->out,"fixedStep chrom=%s start=%d step=1 span=1\n", param->in->header->target_name[tid],pos);
+				/* print WIGGLE header . First base of a WIG is 1*/
+				fprintf(param->out,"fixedStep chrom=%s start=%d step=1 span=1\n", param->in->header->target_name[tid],pos+1);
 				}
 			while(param->count_zero >0)
 				{
@@ -93,11 +93,13 @@ static void usage()
 	fprintf(stdout, "Options:\n");
 	fprintf(stdout, " -z <int> number of depth=0 accepted before starting a new WIG file (default:%d).:\n",NUM_ZERO_ACCEPTED_DEFAULT);
 	fprintf(stdout, " -o <filename-out> save as... (default:stdout).\n");
+	fprintf(stdout, " -t print a ucsc custom track header.\n");
 	}
 	
 int main(int argc, char *argv[])
 	{
 	int optind=1;
+	int header=0;
 	char* fileout=NULL;
 	Param parameter;
 	
@@ -120,6 +122,10 @@ int main(int argc, char *argv[])
 		else if(strcmp(argv[optind],"-o")==0 && optind+1<argc)
 			{
 			fileout=argv[++optind];
+			}
+		else if(strcmp(argv[optind],"-t")==0)
+			{
+			header=1;
 			}
 		else if(strcmp(argv[optind],"-z")==0 && optind+1<argc)
 		        {
@@ -163,7 +169,10 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 			}
 		}
-	
+	if(header!=0)
+		{
+		fputs( "track name=\"__TRACK_NAME__\" description=\"__TRACK_DESC__\" type=\"wiggle_0\"\n",parameter.out);
+		}
 	if (optind+1 == argc)
 		{
 		sampileup(parameter.in, -1, scan_all_genome_func, &parameter);
@@ -205,4 +214,3 @@ int main(int argc, char *argv[])
 		}
 	return EXIT_SUCCESS;
 	}
-
