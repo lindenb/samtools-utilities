@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 		}
 	else
 		{
-		fprintf(stderr, "illegal number of arguments.\n",argv[optind]);
+		fprintf(stderr, "illegal number of arguments.\n");
 		return EXIT_FAILURE;
 		}
 	samclose(parameter.in);
