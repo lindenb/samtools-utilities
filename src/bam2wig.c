@@ -151,7 +151,12 @@ int main(int argc, char *argv[])
 		        }
 		++optind;
 		}
-
+        
+        if(optind==argc)
+		{
+		usage();
+		return EXIT_FAILURE;
+		}
 	parameter.in = samopen(argv[optind], "rb", 0);
 	if (parameter.in == 0)
 		{
