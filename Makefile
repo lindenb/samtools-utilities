@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -O2
 
-all:bin/ttview bin/selectflag bin/bamsorted bin/bam2wig
+all:bin/ttview bin/selectflag bin/bamsorted bin/bam2wig bin/faidx.cgi
 
 
 checkenv:
@@ -18,7 +18,8 @@ bin/bamsorted:src/bamsorted.c bin checkenv
 	$(CC) ${CFLAGS} -o $@ -I ${SAMDIR} -L ${SAMDIR} $< -lbam -lz
 bin/bam2wig:src/bam2wig.c bin checkenv
 	$(CC) ${CFLAGS} -o $@ -I ${SAMDIR} -L ${SAMDIR} $< -lbam -lz
-
+bin/faidx.cgi:src/faidxcgi.c bin checkenv
+	$(CC) ${CFLAGS}  -o $@ -I ${SAMDIR} -L ${SAMDIR} -DBUILD=$(BUILD) -DGENOME_PATH=$(GENOME_PATH)  $<  ${SAMDIR}/faidx.o ${SAMDIR}/razf.o ${SAMDIR}/knetfile.o -lz
 
 bin:
 	mkdir -p bin
