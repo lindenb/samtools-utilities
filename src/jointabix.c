@@ -9,7 +9,7 @@ WWW:
 Contact:
 	plindenbaum@yahoo.fr
 Reference:
-	http://plindenbaum.blogspot.com
+	http://plindenbaum.blogspot.com/2011/09/joining-genomic-annotations-files-with.html
 Compilation:
 	gcc -o jointabix -Wall -O2 -I${TABIXDIR} -L${TABIXDIR} jointabix.c  -ltabix -lz
 API:
@@ -37,6 +37,7 @@ typedef struct {
 	int chromCol;
 	int startCol;
 	int endCol;
+	int shift;
 	tabix_t *t;
 	} JoinTabix;
 
@@ -145,7 +146,6 @@ static int parseInt1(const char* s)
 
 static int join(JoinTabix* app)
  	{
- 	int c;
  	while(readline(app)!=NULL)
  		{
  		int tid=0;
@@ -153,6 +153,7 @@ static int join(JoinTabix* app)
  		int chromStart=0;
  		int chromEnd=0;
  		if(app->line[0]==0) continue;
+ 		
  		if(app->line[0]==app->ignore)
  			{
  			fputs(app->line,stdout);
@@ -178,6 +179,9 @@ static int join(JoinTabix* app)
  			{
  			const char *s;
  			int len;
+ 			if(chromStart==chromEnd) ++chromEnd;
+ 			chromStart+= app->shift;
+ 			chromEnd+= app->shift;
  			ti_iter_t iter = ti_queryi(app->t, tid, chromStart, chromEnd);
 			while ((s = ti_read(app->t, iter, &len)) != 0)
 				{
@@ -185,16 +189,18 @@ static int join(JoinTabix* app)
 				fputc(app->delim, stdout);
 				fputs(s, stdout);
 				fputc('\n', stdout);
+				++found;
 				}
 			ti_iter_destroy(iter);
-			++found;
 			}
 		if(found==0)
 			{
+			fputs("##boum\t",stdout);
  			printTokens(stdout,app);
  			fputc('\n',stdout);
 			}
  		}
+ 	return 0;
  	}
 
 
@@ -216,20 +222,30 @@ int main(int argc, char *argv[])
 		    {
 		    fprintf(stdout, "Author: Pierre Lindenbaum PHD. 2011.\n");
 		    fprintf(stdout, "Last compilation:%s %s\n",__DATE__,__TIME__);
-		    fprintf(stdout, "Usage: %s (option) {stdin|file|gzfiles}:\n",argv[0]);
+		    fprintf(stdout, "Usage: %s (options) {stdin|file|gzfiles}:\n",argv[0]);
 		    fprintf(stdout, "  -d <char> column delimiter. default: TAB\n");
 		    fprintf(stdout, "  -c <int> chromosome column (%d).\n",param.chromCol+1);
 		    fprintf(stdout, "  -s <int> start column (%d).\n",param.startCol+1);
 		    fprintf(stdout, "  -e <int> end column (%d).\n",param.endCol+1);
 		    fprintf(stdout, "  -i <char> ignore lines starting with (\'%c\').\n",param.ignore);
 		    fprintf(stdout, "  -t <filename> tabix file (required).\n");
+		    fprintf(stdout, "  +1 add 1 to the genomic coodinates.\n");
+		    fprintf(stdout, "  -1 remove 1 to the genomic coodinates.\n");
 		    return EXIT_SUCCESS;
 		    }
 	    else if(strcmp(argv[optind],"-f")==0 && optind+1< argc)
 	    	{
 	    	tabixfile=argv[++optind];
 	    	}
-	     else if(strcmp(argv[optind],"-d")==0 && optind+1< argc)
+	    else if(strcmp(argv[optind],"-1")==0)
+	    	{
+	    	param.shift=-1;
+	    	}
+	    else if(strcmp(argv[optind],"+1")==0)
+	    	{
+	    	param.shift=1;
+	    	}
+	    else if(strcmp(argv[optind],"-d")==0 && optind+1< argc)
 		    {
 		    if(strlen(argv[optind+1])!=1)
 		    	{

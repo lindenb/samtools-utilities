@@ -44,3 +44,4 @@ test-tabix:$(BIN)/jointabix
 	
 clean:
 	rm -f $(BIN)/battview $(BIN)/bamsorted $(BIN)/selectflag $(BIN)/bam2wig
+	rm -f cytoBand.txt.gz  cytoBand.txt.gz.tbi

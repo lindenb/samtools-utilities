@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 		idx = bam_index_load(argv[optind]); // load BAM index
 		if (idx == 0)
 			{
-			fprintf(stderr, "BAM indexing file is not available for \"%s\".\n",argv[optind]);
+			fprintf(stderr, "BAM indexed file is not available for \"%s\".\n",argv[optind]);
 			return EXIT_FAILURE;
 			}
 		bam_parse_region(parameter.in->header, argv[optind+1], &ref,
