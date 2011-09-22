@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -O2
 BIN=../bin
-all:$(BIN)/ttview $(BIN)/bamsorted $(BIN)/bam2wig 
+all:$(BIN)/ttview $(BIN)/bamsorted $(BIN)/bam2wig  $(BIN)/jointabix
 
 checksamenv:
 	if [ -z "${SAMDIR}" ]; then echo '###ERROR: the environment variable $${SAMDIR} is not defined.'; exit -1; fi
