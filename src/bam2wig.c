@@ -89,7 +89,7 @@ static void usage()
 	{
 	fprintf(stdout, "Author: Pierre Lindenbaum PHD. 2011.\n");
 	fprintf(stdout, "Last compilation:%s %s\n",__DATE__,__TIME__);
-	fprintf(stdout, "Usage: bam2wig (options) <aln.bam>\n");
+	fprintf(stdout, "Usage: bam2wig (options) <aln.bam> [chr:start-end]\n");
 	fprintf(stdout, "Options:\n");
 	fprintf(stdout, " -z <int> number of depth=0 accepted before starting a new WIG file (default:%d).:\n",NUM_ZERO_ACCEPTED_DEFAULT);
 	fprintf(stdout, " -o <filename-out> save as... (default:stdout).\n");
